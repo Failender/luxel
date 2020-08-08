@@ -1,0 +1,5 @@
+<mat-card>
+  <mat-card-content *ngIf="profile | async as data">
+    <div>Angemeldet als: {{data.displayName}}</div>
+  </mat-card-content>
+</mat-card>
