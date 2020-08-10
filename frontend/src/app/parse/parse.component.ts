@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@an
 import {HttpClient} from '@angular/common/http';
 import {delay, retryWhen} from 'rxjs/operators';
 import {Observable} from 'rxjs';
+import {SelectionModel} from '@angular/cdk/collections';
 
 
 declare var XLSX;
@@ -14,16 +15,24 @@ declare var XLSX;
 })
 export class ParseComponent implements OnInit {
 
+
+  public selection: SelectionModel<Event>
+  public displayedColumns = ['select', 'start', 'end', 'name'];
+  public events: Event[];
+  public existingEvents;
+
+  public progressBarValue = null;
+  public progressBarMax = null;
+  public progressBarCurrentStep;
+
   constructor(private cdr: ChangeDetectorRef, private http: HttpClient) {
   }
 
   ngOnInit(): void {
 
+    this.selection = new SelectionModel<any>(true, []);
   }
 
-  public displayedColumns = ['start', 'end', 'name'];
-  public events: Event[];
-  public existingEvents;
 
   public fileInputChange(event): void {
 
@@ -112,7 +121,6 @@ export class ParseComponent implements OnInit {
   }
 
   private getExistingEvents(): void {
-    const month = this.events[0].startDate.getMonth();
     const startDate = new Date(this.events[0].startDate);
     startDate.setDate(1);
     const endDate = new Date(this.events[0].endDate);
@@ -122,7 +130,9 @@ export class ParseComponent implements OnInit {
 
     this.http.get<any>(uri)
       .subscribe(data => {
-        this.existingEvents = data.value;
+        let events = data.value;
+        events = events.filter(entry => entry.bodyPreview.indexOf('luxel') !== -1)
+        this.existingEvents = events;
         this.cdr.markForCheck();
       });
   }
@@ -150,9 +160,13 @@ export class ParseComponent implements OnInit {
   }
 
   public addEvents(): void {
-    console.debug(this.events);
     const events = this.events.filter(entry => !this.doesEventExist(entry));
-    console.debug(events);
+    this.createNextEvent(events);
+
+  }
+
+  public addSelectedEvents(): void {
+    const events = this.selection.selected.filter(entry => !this.doesEventExist(entry));
     this.createNextEvent(events);
 
   }
@@ -209,20 +223,38 @@ export class ParseComponent implements OnInit {
       this.cdr.markForCheck();
       return;
     }
+
+    if(!!this.progressBarMax) {
+      this.progressBarMax = events.length;
+      this.progressBarValue = 0;
+    }
     const event = events.pop();
     if (event.bodyPreview.indexOf('luxel') === -1) {
-      console.debug('skipping event ', event.bodyPreview);
+      console.error('skipping event ', event.bodyPreview);
       this.deleteNextEvent(events);
     }
     this.http.delete(`https://graph.microsoft.com/v1.0/me/events/${event.id}`)
       .pipe(retryWhen(errors => errors.pipe(delay(1000))))
       .subscribe((response => {
-        console.debug(events.length);
-
+        this.progressBarCurrentStep += 1;
+        this.progressBarValue = this.pr
         this.deleteNextEvent(events);
 
 
       }));
+  }
+
+  public isAllSelected(): boolean {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.events.length;
+    return numSelected === numRows;
+  }
+
+  /** Selects all rows if they are not all selected; otherwise clear selection. */
+  public masterToggle(): void {
+    this.isAllSelected() ?
+      this.selection.clear() :
+      this.events.forEach(row => this.selection.select(row));
   }
 
 

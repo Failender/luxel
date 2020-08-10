@@ -27,6 +27,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatListModule} from '@angular/material/list';
 import { ParseComponent } from './parse/parse.component';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
 
 @NgModule({
   declarations: [
@@ -62,7 +64,9 @@ import { ParseComponent } from './parse/parse.component';
     MatPaginatorModule,
     MatProgressSpinnerModule,
     MatSidenavModule,
-    MatListModule
+    MatListModule,
+    MatCheckboxModule,
+    MatProgressBarModule
   ],
   providers: [
     {
