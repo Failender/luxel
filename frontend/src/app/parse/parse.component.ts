@@ -16,7 +16,7 @@ declare var XLSX;
 export class ParseComponent implements OnInit {
 
 
-  public selection: SelectionModel<Event>
+  public selection: SelectionModel<Event>;
   public displayedColumns = ['select', 'start', 'end', 'name'];
   public events: Event[];
   public existingEvents;
@@ -97,8 +97,8 @@ export class ParseComponent implements OnInit {
       if (endDate.getTime() < startDate.getTime()) {
         endDate.setDate(endDate.getDate() + 1);
       }
-      startDate.setFullYear(2021);
-      endDate.setFullYear(2021);
+      startDate.setFullYear(2020);
+      endDate.setFullYear(2020);
 
 
       events.push({
@@ -131,7 +131,7 @@ export class ParseComponent implements OnInit {
     this.http.get<any>(uri)
       .subscribe(data => {
         let events = data.value;
-        events = events.filter(entry => entry.bodyPreview.indexOf('luxel') !== -1)
+        events = events.filter(entry => entry.bodyPreview.indexOf('luxel') !== -1);
         this.existingEvents = events;
         this.cdr.markForCheck();
       });
@@ -174,7 +174,6 @@ export class ParseComponent implements OnInit {
   private doesEventExist(event): boolean {
     const existingEvent = this.existingEvents.find(entry => this.areEventsEqual(event, entry));
     if (existingEvent) {
-      console.debug('event already exists - skipping', event);
       return true;
     }
     return false;
@@ -200,8 +199,15 @@ export class ParseComponent implements OnInit {
   private createNextEvent(events: Event[]): void {
     if (events.length === 0) {
       this.getExistingEvents();
-      console.debug('DONE!!');
+      this.progressBarMax = null;
+      this.cdr.markForCheck();
       return;
+    }
+    if (!this.progressBarMax) {
+      this.progressBarMax = events.length;
+      this.progressBarValue = 0;
+      this.progressBarCurrentStep = 0;
+      this.cdr.markForCheck();
     }
     const event = events.pop();
 
@@ -209,7 +215,9 @@ export class ParseComponent implements OnInit {
     this.createCalendarEvent(event)
       .pipe(retryWhen(errors => errors.pipe(delay(1000))))
       .subscribe((response => {
-        console.debug(events.length);
+        this.progressBarCurrentStep += 1;
+        this.progressBarValue = this.progressBarCurrentStep / this.progressBarMax * 100;
+        this.cdr.markForCheck();
 
         this.createNextEvent(events);
 
@@ -221,12 +229,15 @@ export class ParseComponent implements OnInit {
     if (events.length === 0) {
       this.existingEvents = [];
       this.cdr.markForCheck();
+      this.progressBarMax = null;
       return;
     }
 
-    if(!!this.progressBarMax) {
+    if (!this.progressBarMax) {
       this.progressBarMax = events.length;
       this.progressBarValue = 0;
+      this.progressBarCurrentStep = 0;
+      this.cdr.markForCheck();
     }
     const event = events.pop();
     if (event.bodyPreview.indexOf('luxel') === -1) {
@@ -237,7 +248,8 @@ export class ParseComponent implements OnInit {
       .pipe(retryWhen(errors => errors.pipe(delay(1000))))
       .subscribe((response => {
         this.progressBarCurrentStep += 1;
-        this.progressBarValue = this.pr
+        this.progressBarValue = this.progressBarCurrentStep / this.progressBarMax * 100;
+        this.cdr.markForCheck();
         this.deleteNextEvent(events);
 
 
