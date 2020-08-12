@@ -11,12 +11,13 @@ export const protectedResourceMap: [string, string[]][] = [
 export const isIE = window.navigator.userAgent.indexOf('MSIE ') > -1 || window.navigator.userAgent.indexOf('Trident/') > -1;
 
 export function MSALConfigFactory(): Configuration {
+  console.debug('URI', environment.redirectUri);
   return {
     auth: {
       clientId: 'd9191eda-120a-4a15-b9f3-da457e683e38',
       validateAuthority: true,
       redirectUri: environment.redirectUri,
-      postLogoutRedirectUri: 'http://localhost:4200/',
+      postLogoutRedirectUri: environment.redirectUri,
       navigateToLoginRequestUrl: true,
     },
     cache: {
