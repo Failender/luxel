@@ -26,11 +26,11 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     if (!!this.authService.getAccount()) {
-      // this.router.navigateByUrl('/calendar');
+      this.router.navigateByUrl('/parse');
     }
 
     this.subs.push(this.broadcastService.subscribe('msal:loginSuccess', () => {
-      this.router.navigateByUrl('/calendar');
+      this.router.navigateByUrl('/parse');
     }));
     var tokenRequest = {
       scopes: ['user.read', 'mail.read', 'Calendars.ReadWrite']
