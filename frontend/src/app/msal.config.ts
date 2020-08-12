@@ -1,5 +1,6 @@
 import {Configuration} from 'msal';
 import {MsalAngularConfiguration} from '@azure/msal-angular';
+import {environment} from '../environments/environment';
 
 export const protectedResourceMap: [string, string[]][] = [
   ['https://graph.microsoft.com/v1.0/me', ['user.read']],
@@ -14,7 +15,7 @@ export function MSALConfigFactory(): Configuration {
     auth: {
       clientId: 'd9191eda-120a-4a15-b9f3-da457e683e38',
       validateAuthority: true,
-      redirectUri: 'http://localhost:4200/',
+      redirectUri: environment.redirectUri,
       postLogoutRedirectUri: 'http://localhost:4200/',
       navigateToLoginRequestUrl: true,
     },
