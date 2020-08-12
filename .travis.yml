@@ -7,5 +7,5 @@ jobs:
       script:
         - cd $TRAVIS_BUILD_DIR/frontend
         - docker login -u $DOCKER_USER -p $DOCKER_PASS
-        - docker build -t $REPO:$TRAVIS_BRANCH .
-        - docker push $REPO
+        - docker build -t failender/luxel:$TRAVIS_BRANCH .
+        - docker push failender/luxel
