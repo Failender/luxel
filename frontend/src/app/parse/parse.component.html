@@ -1,12 +1,17 @@
 <input #csvInput hidden="true" type="file" onclick="this.value=null" (change)="fileInputChange($event)" accept=".xlsx"/>
-<button mat-flat-button color="primary" (click)="csvInput.click()">Choose Spreadsheet File (XLSX)</button>
-<button mat-flat-button color="primary" [disabled]="existingEvents == null" (click)="addEvents()">Add events to
+<button mat-flat-button color="primary" [disabled]="progressBarMax " (click)="csvInput.click()">Choose Spreadsheet File
+  (XLSX)
+</button>
+<button mat-flat-button color="primary" [disabled]="progressBarMax || existingEvents == null" (click)="addEvents()">Add
+  events to
   calendar
 </button>
-<button mat-flat-button color="primary" [disabled]="selection.selected.length === 0" (click)="addSelectedEvents()">
+<button mat-flat-button color="primary" [disabled]="progressBarMax || selection.selected.length === 0"
+        (click)="addSelectedEvents()">
   Add selected events to
   calendar {{selection.selected.length === 0 ? '' : '(' + selection.selected.length + ')'}}</button>
-<button mat-flat-button color="primary" [disabled]="existingEvents == null" (click)="deleteAllEvents()">Delete events
+<button mat-flat-button color="primary" [disabled]="progressBarMax || existingEvents == null"
+        (click)="deleteAllEvents()">Delete events
   for current month {{existingEvents ? "(" + existingEvents.length + ")" : ""}}
 </button>
 
